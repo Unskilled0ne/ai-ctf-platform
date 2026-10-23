@@ -1,4 +1,12 @@
-# AI Security CTF Platform
+# AI Security CTF Platform 🎯🏁
+
+**Containerized Multi-Tenant Capture-the-Flag Arena for Adversarial AI & Application Security.**  
+*Engineered by [Vasilis Tsiamouras](https://www.linkedin.com/in/vasilis-tsiamouras/)*
+
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.110%2B-009688.svg)](https://fastapi.tiangolo.com/)
+[![Docker](https://img.shields.io/badge/Docker-Multi--Container-2496ED.svg)](https://www.docker.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A containerized, multi-tenant capture-the-flag (CTF) arena specifically designed for hands-on adversarial AI, LLM red teaming, and traditional application security testing.
 

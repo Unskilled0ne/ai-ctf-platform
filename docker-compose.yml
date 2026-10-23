@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  ingest:
+    build:
+      context: ./ingest_service
+      dockerfile: Dockerfile
+    container_name: ctf-ingest-service
+    ports:
+      - "8000:8000"
+    environment:
+      - DASHBOARD_DB_PATH=/app/data/ctf_dashboard.db
+      - DASHBOARD_ADMIN_KEY=changeme
+    volumes:
+      - ctf_data:/app/data
+    restart: unless-stopped
+
+  challenge:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ctf-challenge-pod
+    ports:
+      - "8001:8001"
+    environment:
+      - DASHBOARD_INGEST_URL=http://ingest:8000/api/ingest
+      - ENVIRONMENT=production
+    depends_on:
+      - ingest
+    restart: unless-stopped
+
+volumes:
+  ctf_data:
