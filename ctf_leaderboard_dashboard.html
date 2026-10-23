@@ -1,0 +1,784 @@
+/* PREPEI ME KAPOIO TROPO NA PERNEI STOIXEIA APO TA CONTAINERS KAI NA KANEI TIS ANALOGES DIADIKASIES */
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NGDSA // Live Standings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#0b0e1f;
+    --void-2:#080a17;
+    --panel:#131834;
+    --panel-alt:#1b2144;
+    --line:#262c54;
+    --cyan:#2de2ff;
+    --magenta:#ff3ea5;
+    --violet:#8b5cf6;
+    --green:#4affa0;
+    --text-hi:#edeffc;
+    --text-lo:#7a82ad;
+    --text-mid:#a6adcf;
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(45,226,255,0.10), transparent 60%),
+      radial-gradient(ellipse 900px 500px at 100% 0%, rgba(255,62,165,0.08), transparent 55%),
+      repeating-linear-gradient(180deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 34px),
+      var(--void);
+    color:var(--text-hi);
+    font-family:'Inter', sans-serif;
+    padding:28px 20px 60px;
+  }
+
+  ::selection{ background:var(--cyan); color:var(--void); }
+
+  a{ color:inherit; }
+
+  :focus-visible{
+    outline:2px solid var(--cyan);
+    outline-offset:3px;
+    border-radius:4px;
+  }
+
+  .wrap{ max-width:1180px; margin:0 auto; }
+
+  /*  header */
+  .topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    flex-wrap:wrap;
+    gap:16px;
+    padding-bottom:22px;
+    border-bottom:1px solid var(--line);
+    margin-bottom:26px;
+  }
+  .brand-eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.22em;
+    color:var(--cyan);
+    text-transform:uppercase;
+    margin:0 0 6px;
+  }
+  .brand-title{
+    font-family:'Rajdhani', sans-serif;
+    font-weight:700;
+    font-size:clamp(28px, 4vw, 42px);
+    letter-spacing:0.01em;
+    margin:0;
+    line-height:1;
+    position:relative;
+    display:inline-block;
+  }
+  .brand-title span{
+    background:linear-gradient(90deg, var(--cyan), var(--violet) 55%, var(--magenta));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  .brand-sub{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    color:var(--text-lo);
+    margin:8px 0 0;
+  }
+
+  .status-cluster{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    gap:10px;
+  }
+  .live-pill{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--green);
+    background:rgba(74,255,160,0.08);
+    border:1px solid rgba(74,255,160,0.35);
+    padding:5px 10px;
+    border-radius:20px;
+  }
+  .live-dot{
+    width:7px; height:7px; border-radius:50%;
+    background:var(--green);
+    box-shadow:0 0 8px var(--green);
+    animation:pulse 1.6s ease-in-out infinite;
+  }
+  .demo-pill{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--text-lo);
+    border:1px dashed var(--line);
+    padding:5px 10px;
+    border-radius:20px;
+    transition:color 0.3s, border-color 0.3s, background 0.3s;
+  }
+  .demo-pill.connected{
+    color:var(--cyan);
+    border:1px solid rgba(45,226,255,0.4);
+    background:rgba(45,226,255,0.08);
+  }
+  .clock{
+    font-family:'JetBrains Mono', monospace;
+    font-size:20px;
+    color:var(--text-hi);
+    letter-spacing:0.05em;
+  }
+  @keyframes pulse{
+    0%,100%{ opacity:1; }
+    50%{ opacity:0.35; }
+  }
+
+  /* stat strip */
+
+  .stat-strip{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+    border-radius:12px;
+    overflow:hidden;
+    margin-bottom:26px;
+  }
+  .stat{
+    background:var(--panel);
+    padding:16px 18px;
+  }
+  .stat-label{
+    font-family:'JetBrains Mono', monospace;
+    font-size:10px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--text-lo);
+    margin:0 0 6px;
+  }
+  .stat-value{
+    font-family:'Rajdhani', sans-serif;
+    font-weight:700;
+    font-size:26px;
+    color:var(--text-hi);
+    font-variant-numeric:tabular-nums;
+  }
+  .stat-value.accent-cyan{ color:var(--cyan); }
+  .stat-value.accent-magenta{ color:var(--magenta); }
+
+  /*BREACH SIGNAL HERO */
+
+  .hero{
+    background:linear-gradient(180deg, var(--panel), var(--panel-alt) 140%);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:26px 26px 20px;
+    margin-bottom:26px;
+    position:relative;
+    overflow:hidden;
+  }
+  .hero::before{
+    content:"";
+    position:absolute; inset:0;
+    background:repeating-linear-gradient(115deg, rgba(255,255,255,0.025) 0 2px, transparent 2px 26px);
+    pointer-events:none;
+  }
+  .hero-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:22px;
+    position:relative;
+  }
+  .hero-eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.2em;
+    text-transform:uppercase;
+    color:var(--text-lo);
+    margin:0;
+  }
+  .hero-hint{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    color:var(--text-lo);
+  }
+  .signal-row{
+    display:flex;
+    align-items:flex-end;
+    gap:22px;
+    height:230px;
+    padding:0 6px;
+    position:relative;
+  }
+  .signal-col{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    height:100%;
+    justify-content:flex-end;
+    gap:10px;
+  }
+  .signal-score{
+    font-family:'JetBrains Mono', monospace;
+    font-weight:700;
+    font-size:15px;
+    color:var(--text-hi);
+    font-variant-numeric:tabular-nums;
+  }
+  .signal-bar{
+    width:100%;
+    max-width:64px;
+    border-radius:6px 6px 3px 3px;
+    background:linear-gradient(180deg, var(--bar-c1), var(--bar-c2));
+    box-shadow:0 0 22px -2px var(--bar-glow);
+    transition:height 0.7s cubic-bezier(.2,.8,.2,1);
+    position:relative;
+  }
+  .signal-col:nth-child(1) .signal-bar{ --bar-c1:var(--cyan); --bar-c2:#0d7f96; --bar-glow:var(--cyan); }
+  .signal-col:nth-child(2) .signal-bar{ --bar-c1:var(--violet); --bar-c2:#3d2680; --bar-glow:var(--violet); }
+  .signal-col:nth-child(3) .signal-bar{ --bar-c1:var(--magenta); --bar-c2:#7a1750; --bar-glow:var(--magenta); }
+  .signal-rank{
+    font-family:'Rajdhani', sans-serif;
+    font-weight:700;
+    font-size:12px;
+    color:var(--void);
+    background:var(--text-hi);
+    width:22px; height:22px;
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .signal-name{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12.5px;
+    color:var(--text-mid);
+    text-align:center;
+    max-width:110px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+
+  /*  controls  */
+  .controls{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-bottom:12px;
+  }
+  .controls h2{
+    font-family:'Rajdhani', sans-serif;
+    font-size:18px;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    margin:0;
+    color:var(--text-hi);
+  }
+  .search{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:9px;
+    padding:9px 14px;
+    color:var(--text-hi);
+    font-family:'JetBrains Mono', monospace;
+    font-size:13px;
+    width:220px;
+  }
+  .search::placeholder{ color:var(--text-lo); }
+
+  /* table */
+
+  .board{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    overflow:hidden;
+    margin-bottom:26px;
+  }
+  .board-head, .row{
+    display:grid;
+    grid-template-columns:48px 1.4fr 1.6fr 90px 110px;
+    align-items:center;
+    gap:14px;
+    padding:12px 20px;
+  }
+  .board-head{
+    font-family:'JetBrains Mono', monospace;
+    font-size:10px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--text-lo);
+    border-bottom:1px solid var(--line);
+  }
+  .row{
+    border-bottom:1px solid var(--line);
+    border-left:2px solid transparent;
+    transition:background 0.25s, border-color 0.25s;
+    opacity:0;
+    transform:translateY(6px);
+    animation:rowIn 0.5s ease forwards;
+  }
+  .row:last-child{ border-bottom:none; }
+  .row:hover{ background:var(--panel-alt); }
+  .row.phase2-lead{ border-left-color:var(--magenta); }
+  .row.phase1-lead{ border-left-color:var(--cyan); }
+  .row.flash{ background:rgba(74,255,160,0.09); }
+  @keyframes rowIn{ to{ opacity:1; transform:none; } }
+
+  .rank{
+    font-family:'Rajdhani', sans-serif;
+    font-weight:700;
+    font-size:17px;
+    color:var(--text-mid);
+    font-variant-numeric:tabular-nums;
+  }
+  .rank.top{ color:var(--cyan); }
+
+  .team-cell{ display:flex; flex-direction:column; gap:4px; min-width:0; }
+  .team-name{
+    font-family:'JetBrains Mono', monospace;
+    font-size:14px;
+    font-weight:700;
+    color:var(--text-hi);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .team-meta{ display:flex; align-items:center; gap:8px; }
+  .last-solve{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    color:var(--text-lo);
+  }
+  .p2-pill{
+    font-family:'JetBrains Mono', monospace;
+    font-size:9.5px;
+    letter-spacing:0.08em;
+    color:var(--magenta);
+    border:1px solid rgba(255,62,165,0.4);
+    background:rgba(255,62,165,0.08);
+    padding:1px 6px;
+    border-radius:20px;
+    text-transform:uppercase;
+  }
+
+  .flagstrip{ display:flex; gap:4px; }
+  .seg{
+    width:16px; height:8px;
+    border-radius:2px;
+    border:1px solid var(--line);
+    background:transparent;
+    position:relative;
+  }
+  .seg.p1.hit{ background:var(--cyan); border-color:var(--cyan); box-shadow:0 0 6px var(--cyan); }
+  .seg.p2.hit{ background:var(--magenta); border-color:var(--magenta); box-shadow:0 0 6px var(--magenta); }
+  .seg.locked{
+    background:repeating-linear-gradient(45deg, rgba(255,255,255,0.05) 0 2px, transparent 2px 4px);
+    border-color:var(--line);
+    opacity:0.5;
+  }
+
+  .score{
+    font-family:'JetBrains Mono', monospace;
+    font-weight:700;
+    font-size:15px;
+    color:var(--text-hi);
+    font-variant-numeric:tabular-nums;
+    display:flex; align-items:center; gap:6px;
+  }
+  .trend{
+    font-size:11px; color:var(--green);
+    opacity:0; transform:translateY(3px);
+    transition:opacity 0.3s, transform 0.3s;
+  }
+  .trend.show{ opacity:1; transform:none; }
+
+  .captures{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    color:var(--text-lo);
+    text-align:right;
+    font-variant-numeric:tabular-nums;
+  }
+
+  /* LIVE FEED , FASCADE , THEIA KOMODIA , DANTHS */
+  .feed{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:16px 20px 18px;
+  }
+  .feed-head{
+    display:flex; align-items:center; gap:8px;
+    margin-bottom:12px;
+  }
+  .feed-head h2{
+    font-family:'Rajdhani', sans-serif;
+    font-size:15px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    margin:0;
+    color:var(--text-mid);
+  }
+  .feed-dot{ width:6px; height:6px; border-radius:50%; background:var(--cyan); box-shadow:0 0 6px var(--cyan); animation:pulse 1.6s ease-in-out infinite; }
+  .feed-list{ display:flex; flex-direction:column; gap:7px; max-height:190px; overflow-y:auto; }
+  .feed-line{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12.5px;
+    color:var(--text-mid);
+    padding-left:10px;
+    border-left:2px solid var(--line);
+    opacity:0;
+    animation:rowIn 0.4s ease forwards;
+  }
+  .feed-line.p1{ border-left-color:var(--cyan); }
+  .feed-line.p2{ border-left-color:var(--magenta); }
+  .feed-line b{ color:var(--text-hi); }
+  .feed-line .pts{ color:var(--green); }
+  .feed-time{ color:var(--text-lo); margin-right:6px; }
+
+  footer{
+    text-align:center;
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    color:var(--text-lo);
+    margin-top:26px;
+    line-height:1.7;
+  }
+  footer code{
+    background:var(--panel);
+    border:1px solid var(--line);
+    padding:1px 6px;
+    border-radius:4px;
+    color:var(--cyan);
+  }
+
+  /* RESPONSIVE EPEIDH MPORW */
+
+  @media (max-width: 760px){
+    .stat-strip{ grid-template-columns:repeat(2,1fr); }
+    .signal-row{ height:150px; gap:12px; }
+    .board-head{ display:none; }
+    .row{
+      grid-template-columns:1fr;
+      gap:8px;
+      padding:14px 16px;
+    }
+    .rank{ font-size:13px; }
+    .captures{ text-align:left; }
+    .score{ font-size:14px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .live-dot, .feed-dot{ animation:none; }
+    .row{ animation:none; opacity:1; transform:none; }
+    .feed-line{ animation:none; opacity:1; }
+    .signal-bar{ transition:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="topbar">
+    <div>
+      <p class="brand-eyebrow">OURLLM Auto Engineering CTF -- Powered by Palantir</p>
+      <h1 class="brand-title"><span>NGDSA LAB</span> // LIVE STANDINGS</h1>
+      <p class="brand-sub">Phase 1 — Prompt Injection &amp; Data Exfil &nbsp;·&nbsp; Phase 2 — NGDSA Cyber Team</p>
+    </div>
+    <div class="status-cluster">
+      <div class="clock" id="clock">00:00:00</div>
+      <div style="display:flex; gap:8px;">
+        <span class="live-pill"><span class="live-dot"></span>Live</span>
+        <span class="demo-pill" id="modePill">Demo data</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="stat-strip">
+    <div class="stat">
+      <p class="stat-label">Teams online</p>
+      <p class="stat-value" id="statTeams">—</p>
+    </div>
+    <div class="stat">
+      <p class="stat-label">Total captures</p>
+      <p class="stat-value accent-cyan" id="statCaptures">—</p>
+    </div>
+    <div class="stat">
+      <p class="stat-label">Flags remaining</p>
+      <p class="stat-value" id="statRemaining">—</p>
+    </div>
+    <div class="stat">
+      <p class="stat-label">In phase 2</p>
+      <p class="stat-value accent-magenta" id="statPhase2">—</p>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="hero-head">
+      <p class="hero-eyebrow">Breach signal — top 3</p>
+      <p class="hero-hint">bar height = score</p>
+    </div>
+    <div class="signal-row" id="signalRow"></div>
+  </div>
+
+  <div class="controls">
+    <h2>Full standings</h2>
+    <input class="search" id="searchBox" type="text" placeholder="Filter team…" aria-label="Filter teams by name">
+  </div>
+
+  <div class="board">
+    <div class="board-head">
+      <span>Rank</span>
+      <span>Team</span>
+      <span>Flag progress</span>
+      <span>Score</span>
+      <span style="text-align:right;">Captures</span>
+    </div>
+    <div id="boardBody"></div>
+  </div>
+
+  <div class="feed">
+    <div class="feed-head">
+      <span class="feed-dot"></span>
+      <h2>Live feed</h2>
+    </div>
+    <div class="feed-list" id="feedList"></div>
+  </div>
+
+  <footer>
+    Sample data — swap the mock feed for <code>DASHBOARD_INGEST_URL</code> polling when you wire up the orchestrator.<br>
+    Uniqueness per <code>team_id + flag_name</code> assumed upstream.
+  </footer>
+
+</div>
+
+<script>
+
+
+  const FLAGS = [
+    { name:'SYS_PROMPT_LEAK',   phase:1, pts:100 },
+    { name:'PII_EXFIL',         phase:1, pts:100 },
+    { name:'IDOR_BREACH',       phase:1, pts:100 },
+    { name:'WS_SIDECHANNEL',    phase:1, pts:100 },
+    { name:'LOCAL_FILE',        phase:1, pts:100 },
+    { name:'NGDSA_WELCOME',     phase:2, pts:150 },
+    { name:'SOURCE_PERISTERI',  phase:2, pts:150 },
+    { name:'BOF_MEMLEAK',       phase:2, pts:150 },
+    { name:'RAG_IMPERSONATE',   phase:2, pts:150 },
+    { name:'BROWSER_ARTIFACT',  phase:2, pts:150 },
+  ];
+  const MAX_SCORE = FLAGS.reduce((s,f)=>s+f.pts,0);
+
+  const now = Date.now();
+  const minAgo = m => new Date(now - m*60000);
+
+
+ 
+ 
+  let TEAMS = [
+    { name:'FEDORA_PEASEANTS',          flags:[1,1,1,1,1, 1,1,1,1,1], lastSolve:minAgo(2)  },
+    { name:'CS_ENJOYERS',  flags:[1,1,1,1,1, 1,1,1,1,0], lastSolve:minAgo(4)  },
+    { name:'PARA_LIGO_OBRELA',    flags:[1,1,1,1,1, 1,1,1,0,0], lastSolve:minAgo(6)  },
+    { name:'KERNEL_PANIC',    flags:[1,1,1,1,1, 1,1,0,0,0], lastSolve:minAgo(9)  },
+    { name:'ROOT',    flags:[1,1,1,1,1, 1,0,0,0,0], lastSolve:minAgo(11) },
+    { name:'SAXO_VTS_125HP',      flags:[1,1,1,1,0, 0,0,0,0,0], lastSolve:minAgo(14) },
+    { name:'PEUGEUOT_308_SPORT',   flags:[1,1,1,0,1, 0,0,0,0,0], lastSolve:minAgo(17) },
+    { name:'CTRL_ALT_F4',        flags:[1,1,1,0,0, 0,0,0,0,0], lastSolve:minAgo(21) },
+    { name:'RUN_TIME_ERROR',   flags:[1,0,0,0,0, 0,0,0,0,0], lastSolve:minAgo(31) },
+  ];
+
+  const initialFeed = [
+    { time: minAgo(2),  team:'FEDORA_PEASEANTS',   flag:'BROWSER_ARTIFACT', phase:2 },
+    { time: minAgo(4),  team:'CS_ENJOYERS',        flag:'RAG_IMPERSONATE',  phase:2 },
+    { time: minAgo(6),  team:'PARA_LIGO_OBRELA',   flag:'BOF_MEMLEAK',      phase:2 },
+    { time: minAgo(9),  team:'KERNEL_PANIC',       flag:'SOURCE_PERISTERI', phase:2 },
+    { time: minAgo(11), team:'ROOT',               flag:'NGDSA_WELCOME',    phase:2 },
+  ];
+
+
+  const API_BASE = '';
+  let liveMode = false;
+  let lastFeedTs = null;
+
+  function setLive(v){
+    liveMode = v;
+    const pill = document.getElementById('modePill');
+    pill.textContent = v ? 'Live data' : 'Demo data';
+    pill.classList.toggle('connected', v);
+  }
+
+  async function fetchLive(){
+    try{
+      const [sRes, fRes] = await Promise.all([
+        fetch(`${API_BASE}/api/standings`),
+        fetch(`${API_BASE}/api/feed?limit=10`),
+      ]);
+      if (!sRes.ok || !fRes.ok) throw new Error('bad response');
+      const standings = await sRes.json();
+      const feedRows = await fRes.json();
+
+      TEAMS = standings.map(s => ({
+        name: s.team_id,
+        flags: s.flags,
+        lastSolve: s.last_capture ? new Date(s.last_capture) : new Date(0),
+      }));
+
+      
+      const fresh = feedRows
+        .filter(r => !lastFeedTs || r.time > lastFeedTs)
+        .reverse();
+      fresh.forEach(r => pushFeed({ time:new Date(r.time), team:r.team, flag:r.flag, phase:r.phase }));
+      if (feedRows.length) lastFeedTs = feedRows[0].time;
+
+      setLive(true);
+      render(document.getElementById('searchBox').value);
+    }catch(err){
+      setLive(false); // service not reachable — demo simulation keeps running below
+    }
+  }
+
+  function score(team){ return team.flags.reduce((s,hit,i)=> s + (hit?FLAGS[i].pts:0), 0); }
+  function phase1Done(team){ return team.flags.slice(0,5).every(Boolean); }
+  function captureCount(team){ return team.flags.filter(Boolean).length; }
+  function fmtTime(d){ return d.toTimeString().slice(0,8); }
+  function relTime(d){
+    const mins = Math.max(0, Math.round((Date.now()-d.getTime())/60000));
+    if (mins < 1) return 'just now';
+    if (mins === 1) return '1m ago';
+    if (mins < 60) return mins+'m ago';
+    return Math.round(mins/60)+'h ago';
+  }
+
+  function render(filterText){
+    const sorted = [...TEAMS].sort((a,b)=> score(b)-score(a));
+    const filter = (filterText||'').toLowerCase();
+
+    /* stats */
+    document.getElementById('statTeams').textContent = TEAMS.length;
+    document.getElementById('statCaptures').textContent = TEAMS.reduce((s,t)=>s+captureCount(t),0);
+    document.getElementById('statRemaining').textContent = (TEAMS.length*10) - TEAMS.reduce((s,t)=>s+captureCount(t),0);
+    document.getElementById('statPhase2').textContent = TEAMS.filter(phase1Done).length;
+
+    /* hero — top 3 */
+    const top3 = sorted.slice(0,3);
+    const maxScore = Math.max(...top3.map(score), 1);
+    document.getElementById('signalRow').innerHTML = top3.map((t)=>{
+      const h = Math.max(18, Math.round((score(t)/maxScore)*70));
+      return `<div class="signal-col">
+                <div class="signal-score">${score(t)}</div>
+                <div class="signal-bar" style="height:${h}%"></div>
+                <div class="signal-rank">${sorted.indexOf(t)+1}</div>
+                <div class="signal-name">${t.name}</div>
+              </div>`;
+    }).join('');
+
+    /*  board */
+    const body = document.getElementById('boardBody');
+    const visible = sorted.filter(t => t.name.toLowerCase().includes(filter));
+    body.innerHTML = visible.map((t)=>{
+      const rank = sorted.indexOf(t)+1;
+      const p1 = phase1Done(t);
+      const leadClass = rank===1 ? 'phase1-lead' : (p1 ? 'phase2-lead' : '');
+      const segs = FLAGS.map((f,i)=>{
+        const hit = t.flags[i];
+        if (f.phase===1) return `<span class="seg p1 ${hit?'hit':''}" title="${f.name}"></span>`;
+        if (!p1) return `<span class="seg locked" title="${f.name} — locked, clear phase 1"></span>`;
+        return `<span class="seg p2 ${hit?'hit':''}" title="${f.name}"></span>`;
+      }).join('');
+      return `<div class="row ${leadClass}" data-team="${t.name}">
+                <div class="rank ${rank<=3?'top':''}">${String(rank).padStart(2,'0')}</div>
+                <div class="team-cell">
+                  <div class="team-name">${t.name}</div>
+                  <div class="team-meta">
+                    <span class="last-solve">last solve ${relTime(t.lastSolve)}</span>
+                    ${p1 ? '<span class="p2-pill">Phase 2</span>' : ''}
+                  </div>
+                </div>
+                <div class="flagstrip">${segs}</div>
+                <div class="score">${score(t)}<span class="trend" data-trend="${t.name}">▲</span></div>
+                <div class="captures">${captureCount(t)}/10</div>
+              </div>`;
+    }).join('');
+  }
+
+  function pushFeed(entry){
+    const list = document.getElementById('feedList');
+    const line = document.createElement('div');
+    line.className = 'feed-line p' + entry.phase;
+    line.innerHTML = `<span class="feed-time">[${fmtTime(entry.time)}]</span><b>${entry.team}</b> captured ${entry.flag} <span class="pts">+${FLAGS.find(f=>f.name===entry.flag).pts}</span>`;
+    list.prepend(line);
+    while (list.children.length > 8) list.removeChild(list.lastChild);
+  }
+
+ /* EINAI OLA FAKE , FASCADE , THEIA KOMODIA {NA SYNDETHEI ME TA INDIVIDUAL CONTAINERS AMESA ME KAPOIO TROPO} */
+
+  function simulateCapture(){
+    if (liveMode) return;
+    const candidates = TEAMS.filter(t => captureCount(t) < 10);
+    if (!candidates.length) return;
+    const team = candidates[Math.floor(Math.random()*candidates.length)];
+    const p1 = phase1Done(team);
+    const openIdx = [];
+    FLAGS.forEach((f,i)=>{
+      if (team.flags[i]) return;
+      if (f.phase===1) openIdx.push(i);
+      else if (p1) openIdx.push(i);
+    });
+    if (!openIdx.length) return;
+    const idx = openIdx[Math.floor(Math.random()*openIdx.length)];
+    team.flags[idx] = 1;
+    team.lastSolve = new Date();
+    pushFeed({ time:new Date(), team:team.name, flag:FLAGS[idx].name, phase:FLAGS[idx].phase });
+    render(document.getElementById('searchBox').value);
+
+    const row = document.querySelector(`.row[data-team="${CSS.escape(team.name)}"]`);
+    if (row){
+      row.classList.add('flash');
+      setTimeout(()=>row.classList.remove('flash'), 900);
+    }
+    const trend = document.querySelector(`[data-trend="${CSS.escape(team.name)}"]`);
+    if (trend){
+      trend.classList.add('show');
+      setTimeout(()=>trend.classList.remove('show'), 1400);
+    }
+  }
+
+  /*  init */
+  initialFeed.forEach(pushFeed);
+  render('');
+  document.getElementById('searchBox').addEventListener('input', e => render(e.target.value));
+
+  setInterval(()=>{
+    document.getElementById('clock').textContent = fmtTime(new Date());
+  }, 1000);
+  document.getElementById('clock').textContent = fmtTime(new Date());
+
+  setInterval(simulateCapture, 5000);
+
+  fetchLive();
+  setInterval(fetchLive, 4000);
+</script>
+
+</body>
+</html>

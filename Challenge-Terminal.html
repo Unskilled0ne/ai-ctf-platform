@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NGDSA // Auto Engineering CTF</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#0b0e1f; --panel:#131834; --panel-alt:#1b2144; --line:#262c54;
+    --cyan:#2de2ff; --magenta:#ff3ea5; --violet:#8b5cf6; --green:#4affa0; --red:#ff5470;
+    --text-hi:#edeffc; --text-lo:#7a82ad; --text-mid:#a6adcf;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; min-height:100vh;
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(45,226,255,0.10), transparent 60%),
+      radial-gradient(ellipse 900px 500px at 100% 0%, rgba(255,62,165,0.08), transparent 55%),
+      var(--void);
+    color:var(--text-hi); font-family:'Inter', sans-serif; padding:28px 20px 60px;
+  }
+  .wrap{ max-width:980px; margin:0 auto; }
+  .topbar{ display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px;
+    padding-bottom:20px; border-bottom:1px solid var(--line); margin-bottom:22px; }
+  .brand-eyebrow{ font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:0.22em; color:var(--cyan); text-transform:uppercase; margin:0 0 6px; }
+  h1{ font-family:'Rajdhani', sans-serif; font-weight:700; font-size:clamp(24px,4vw,36px); margin:0;
+    background:linear-gradient(90deg, var(--cyan), var(--violet) 55%, var(--magenta));
+    -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .team-pill{ font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--text-mid);
+    border:1px solid var(--line); border-radius:20px; padding:6px 12px; }
+  .phase-pill{ font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:0.1em; text-transform:uppercase;
+    padding:5px 10px; border-radius:20px; border:1px solid rgba(45,226,255,0.4); color:var(--cyan); background:rgba(45,226,255,0.08); }
+  .phase-pill.p2{ border-color:rgba(255,62,165,0.4); color:var(--magenta); background:rgba(255,62,165,0.08); }
+
+  .panel{ background:linear-gradient(180deg, var(--panel), var(--panel-alt) 140%); border:1px solid var(--line);
+    border-radius:14px; padding:20px 22px; margin-bottom:20px; }
+  .panel h2{ font-family:'Rajdhani', sans-serif; font-size:17px; letter-spacing:0.05em; text-transform:uppercase; margin:0 0 14px; color:var(--text-hi); }
+  .panel p.hint{ font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--text-lo); margin:-8px 0 14px; }
+
+  label{ display:block; font-family:'JetBrains Mono', monospace; font-size:10.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-mid); margin:12px 0 5px; }
+  input[type=text], input[type=password], textarea, select{
+    width:100%; background:var(--void); border:1px solid var(--line); border-radius:8px; padding:10px 12px;
+    color:var(--text-hi); font-family:'JetBrains Mono', monospace; font-size:13px;
+  }
+  textarea{ min-height:70px; resize:vertical; }
+  button{
+    margin-top:14px; padding:10px 18px; border:none; border-radius:8px; cursor:pointer;
+    font-family:'Rajdhani', sans-serif; font-weight:700; font-size:14px; letter-spacing:0.03em; text-transform:uppercase;
+    color:var(--void); background:linear-gradient(90deg, var(--cyan), var(--violet));
+  }
+  button.secondary{ background:var(--panel-alt); color:var(--text-hi); border:1px solid var(--line); }
+  button:disabled{ opacity:0.45; cursor:not-allowed; }
+
+  pre.output{
+    background:var(--void); border:1px solid var(--line); border-radius:8px; padding:12px 14px; margin-top:12px;
+    font-family:'JetBrains Mono', monospace; font-size:12.5px; color:var(--text-mid); white-space:pre-wrap; word-break:break-word;
+    max-height:320px; overflow-y:auto;
+  }
+  .row{ display:flex; gap:10px; flex-wrap:wrap; }
+  .row > *{ flex:1; min-width:160px; }
+
+  .flagstrip{ display:flex; gap:5px; flex-wrap:wrap; margin-top:6px; }
+  .seg{ font-family:'JetBrains Mono', monospace; font-size:10px; padding:4px 8px; border-radius:5px; border:1px solid var(--line); color:var(--text-lo); }
+  .seg.hit.p1{ background:rgba(45,226,255,0.12); border-color:var(--cyan); color:var(--cyan); }
+  .seg.hit.p2{ background:rgba(255,62,165,0.12); border-color:var(--magenta); color:var(--magenta); }
+
+  #locked-banner{ font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--text-lo); text-align:center; padding:18px; }
+  #phase2-section.locked .phase2-body{ display:none; }
+
+  .msg-ok{ color:var(--green); font-family:'JetBrains Mono', monospace; font-size:12.5px; }
+  .msg-err{ color:var(--red); font-family:'JetBrains Mono', monospace; font-size:12.5px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div>
+      <p class="brand-eyebrow">OurLLM Auto Engineering CTF</p>
+      <h1>NGDSA // Challenge Terminal</h1>
+    </div>
+    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
+      <span class="team-pill" id="teamPill">Team: —</span>
+      <span class="phase-pill" id="phasePill">Phase 1</span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Parts &amp; Engineering Search</h2>
+    <p class="hint">Your query fans out to three assistants: a joke, part specs, and engineering notes.</p>
+    <input type="text" id="chatInput" placeholder="e.g. brake pad">
+    <button id="chatBtn">Search</button>
+    <pre class="output" id="chatOutput" style="display:none;"></pre>
+  </div>
+
+ 
+  <div class="panel">
+    <h2>Flags</h2>
+    <div class="row">
+      <input type="text" id="flagInput" placeholder="NGDSA{...}">
+      <button id="flagBtn" style="flex:0 0 auto;">Submit</button>
+    </div>
+    <div id="flagMsg" style="margin-top:8px;"></div>
+    <div class="flagstrip" id="flagStrip"></div>
+  </div>
+
+
+  <div class="panel">
+    <h2>Hints</h2>
+    <button class="secondary" id="hintsBtn">Show hints</button>
+    <pre class="output" id="hintsOutput" style="display:none;"></pre>
+  </div>
+
+
+  <div class="panel locked" id="phase2-section">
+    <h2>Phase 2 — NGDSA Cyber Team</h2>
+    <div id="locked-banner">Locked — capture all 5 Phase 1 flags to unlock.</div>
+
+    <div class="phase2-body" style="display:none;">
+      <button class="secondary" id="welcomeBtn">Load welcome packet</button>
+      <pre class="output" id="welcomeOutput" style="display:none;"></pre>
+
+      <label for="sourceSelect">View source</label>
+      <div class="row">
+        <select id="sourceSelect">
+          <option value="main.py">main.py</option>
+          <option value="chains.py">chains.py</option>
+          <option value="flag_crypto.py">flag_crypto.py</option>
+          <option value="parts_db.py">parts_db.py</option>
+          <option value="employee_db.py">employee_db.py</option>
+          <option value="engineering_notes.py">engineering_notes.py</option>
+        </select>
+        <button class="secondary" id="sourceBtn" style="flex:0 0 auto;">Fetch</button>
+      </div>
+      <pre class="output" id="sourceOutput" style="display:none;"></pre>
+
+      <label for="bufInput">Diagnostics buffer</label>
+      <input type="text" id="bufInput" placeholder="send a string to the diagnostics endpoint">
+      <button class="secondary" id="bufBtn">Send</button>
+      <pre class="output" id="bufOutput" style="display:none;"></pre>
+
+      <label for="p2ChatInput">NGDSA assistant</label>
+      <textarea id="p2ChatInput" placeholder="ask the NGDSA Cyber Team assistant something..."></textarea>
+      <button class="secondary" id="p2ChatBtn">Send</button>
+      <pre class="output" id="p2ChatOutput" style="display:none;"></pre>
+    </div>
+  </div>
+
+</div>
+
+<script>
+ 
+  const FLAGS_META = [
+    { name:'SYS_PROMPT_LEAK',   phase:1 }, { name:'PII_EXFIL',        phase:1 },
+    { name:'IDOR_BREACH',       phase:1 }, { name:'WS_SIDECHANNEL',   phase:1 },
+    { name:'LOCAL_FILE',        phase:1 }, { name:'NGDSA_WELCOME',    phase:2 },
+    { name:'SOURCE_PERISTERI',  phase:2 }, { name:'BOF_MEMLEAK',      phase:2 },
+    { name:'RAG_IMPERSONATE',   phase:2 }, { name:'BROWSER_ARTIFACT', phase:2 },
+  ];
+
+  async function api(path, opts={}){
+    const res = await fetch(path, { headers: {'Content-Type':'application/json'}, ...opts });
+    const data = await res.json().catch(()=>({}));
+    if (!res.ok) throw new Error(data.detail || res.statusText);
+    return data;
+  }
+
+  function renderFlagStrip(captured){
+    const strip = document.getElementById('flagStrip');
+    strip.innerHTML = FLAGS_META.map(f => {
+      const hit = captured.includes(f.name);
+      return `<span class="seg ${hit?'hit':''} p${f.phase}">${f.name}</span>`;
+    }).join('');
+  }
+
+  async function refreshStatus(){
+    try {
+      const who = await api('/api/whoami');
+      document.getElementById('teamPill').textContent = `Team: ${who.team_id}`;
+      const pill = document.getElementById('phasePill');
+      pill.textContent = who.phase1_complete ? 'Phase 2 unlocked' : 'Phase 1';
+      pill.classList.toggle('p2', who.phase1_complete);
+      renderFlagStrip(who.captured);
+
+      const section = document.getElementById('phase2-section');
+      const body = section.querySelector('.phase2-body');
+      const banner = document.getElementById('locked-banner');
+      if (who.phase1_complete){
+        section.classList.remove('locked');
+        body.style.display = '';
+        banner.style.display = 'none';
+        maybeStashBrowserArtifact();
+      }
+    } catch (e) {
+      console.error('status refresh failed', e);
+    }
+  }
+
+
+  let _artifactStashed = false;
+  async function maybeStashBrowserArtifact(){
+    if (_artifactStashed) return;
+    try {
+      const data = await api('/api/phase2/artifact');
+      localStorage.setItem('ctf_diag_cache', data.artifact);
+      _artifactStashed = true;
+    } catch (e) { /* phase 2 not actually unlocked server-side yet, ignore */ }
+  }
+
+  document.getElementById('chatBtn').addEventListener('click', async () => {
+    const message = document.getElementById('chatInput').value.trim();
+    if (!message) return;
+    const out = document.getElementById('chatOutput');
+    out.style.display = 'block'; out.textContent = 'Searching…';
+    try {
+      const data = await api('/api/chat', { method:'POST', body: JSON.stringify({ message }) });
+      out.textContent = `JOKE:\n${data.joke}\n\nSPECS:\n${data.specs}\n\nNOTES:\n${data.notes}`;
+    } catch (e) { out.textContent = 'Error: ' + e.message; }
+  });
+
+  document.getElementById('flagBtn').addEventListener('click', async () => {
+    const flag = document.getElementById('flagInput').value.trim();
+    const msg = document.getElementById('flagMsg');
+    if (!flag) return;
+    try {
+      const data = await api('/api/flags/submit', { method:'POST', body: JSON.stringify({ flag }) });
+      msg.innerHTML = data.status === 'duplicate'
+        ? `<span class="msg-ok">Already captured: ${data.flag_name}</span>`
+        : `<span class="msg-ok">Captured ${data.flag_name} (+${data.points})</span>`;
+      document.getElementById('flagInput').value = '';
+      refreshStatus();
+    } catch (e) {
+      msg.innerHTML = `<span class="msg-err">${e.message}</span>`;
+    }
+  });
+
+  document.getElementById('hintsBtn').addEventListener('click', async () => {
+    const out = document.getElementById('hintsOutput');
+    out.style.display = 'block';
+    try {
+      const data = await api('/api/hints');
+      out.textContent = data.hints.map((h,i)=>`${i+1}. ${h}`).join('\n');
+    } catch (e) { out.textContent = 'Error: ' + e.message; }
+  });
+
+  document.getElementById('welcomeBtn').addEventListener('click', async () => {
+    const out = document.getElementById('welcomeOutput');
+    out.style.display = 'block'; out.textContent = 'Loading…';
+    try {
+      const data = await api('/api/phase2/welcome');
+      out.textContent = data.message;
+    } catch (e) { out.textContent = 'Error: ' + e.message; }
+  });
+
+  document.getElementById('sourceBtn').addEventListener('click', async () => {
+    const filename = document.getElementById('sourceSelect').value;
+    const out = document.getElementById('sourceOutput');
+    out.style.display = 'block'; out.textContent = 'Loading…';
+    try {
+      const res = await fetch(`/api/source/${encodeURIComponent(filename)}`);
+      out.textContent = await res.text();
+    } catch (e) { out.textContent = 'Error: ' + e.message; }
+  });
+
+  document.getElementById('bufBtn').addEventListener('click', async () => {
+    const buffer = document.getElementById('bufInput').value;
+    const out = document.getElementById('bufOutput');
+    out.style.display = 'block'; out.textContent = 'Sending…';
+    try {
+      const res = await fetch('/api/phase2/diagnostics', {
+        method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ buffer }),
+      });
+      out.textContent = await res.text();
+    } catch (e) { out.textContent = 'Error: ' + e.message; }
+  });
+
+  document.getElementById('p2ChatBtn').addEventListener('click', async () => {
+    const message = document.getElementById('p2ChatInput').value.trim();
+    if (!message) return;
+    const out = document.getElementById('p2ChatOutput');
+    out.style.display = 'block'; out.textContent = 'Thinking…';
+    try {
+      const data = await api('/api/phase2/chat', { method:'POST', body: JSON.stringify({ message }) });
+      out.textContent = data.reply;
+    } catch (e) { out.textContent = 'Error: ' + e.message; }
+  });
+
+  refreshStatus();
+  setInterval(refreshStatus, 8000);
+</script>
+</body>
+</html>
